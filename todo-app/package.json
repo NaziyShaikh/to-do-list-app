@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && if exist build (move /Y build .build) else (mkdir .build)",
+    "build": "react-scripts build && mv build .build 2>/dev/null || mkdir .build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
