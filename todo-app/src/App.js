@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getTodos, addTodo, updateTodo, deleteTodo } from './api/todoApi';
 import './App.css';
 
-
-const TodoItem = ({ todo, onComplete, onIncomplete, onDelete }) => (
+const TodoItem = ({ todo, onComplete, onIncomplete, onDelete, onEdit }) => (
   <div className={`todo-item ${todo.completed ? 'completed' : ''}`}>
     <div className="flex-1">
       <h3 className="todo-text font-semibold text-lg">
@@ -37,6 +36,12 @@ const TodoItem = ({ todo, onComplete, onIncomplete, onDelete }) => (
           Incomplete
         </button>
       )}
+      <button
+        onClick={() => onEdit(todo)}
+        className="todo-button bg-blue-500 hover:bg-blue-600"
+      >
+        Edit
+      </button>
       <button
         onClick={() => onDelete(todo._id)}
         className="todo-button bg-red-500 hover:bg-red-600"
@@ -89,6 +94,7 @@ const TodoForm = ({ onSubmit, task, description, priority, dueDate, onChange }) 
     </button>
   </form>
 );
+
 const TodoSearch = ({ search, filterPriority, filterStatus, onChange, onSearch }) => (
   <div className="todo-form">
     <div className="flex gap-4 mb-4">
@@ -127,6 +133,63 @@ const TodoSearch = ({ search, filterPriority, filterStatus, onChange, onSearch }
   </div>
 );
 
+const EditTodo = ({ todo, onSave, onCancel, onClose }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <h2 className="text-2xl font-bold mb-4">Edit Todo</h2>
+      <form onSubmit={onSave} className="todo-form">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <input
+            type="text"
+            placeholder="Task"
+            value={todo.task}
+            onChange={(e) => onSave('task', e.target.value)}
+            className="todo-input"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            value={todo.description}
+            onChange={(e) => onSave('description', e.target.value)}
+            className="todo-input"
+          />
+          <select
+            value={todo.priority}
+            onChange={(e) => onSave('priority', e.target.value)}
+            className="todo-input"
+          >
+            <option value="Low">Low Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="High">High Priority</option>
+          </select>
+          <input
+            type="date"
+            value={todo.dueDate}
+            onChange={(e) => onSave('dueDate', e.target.value)}
+            className="todo-input"
+          />
+        </div>
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="todo-button bg-gray-500 hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="todo-button bg-blue-500 hover:bg-blue-600"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+);
+
 function App() {
   const [todos, setTodos] = useState([]);
   const [task, setTask] = useState('');
@@ -138,6 +201,7 @@ function App() {
   const [filterStatus, setFilterStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [editingTodo, setEditingTodo] = useState(null);
 
   const fetchTodos = useCallback(async () => {
     try {
@@ -242,6 +306,30 @@ function App() {
     handleUpdateTodo(id, { completed: false });
   };
 
+  const handleEditTodo = (todo) => {
+    setEditingTodo(todo);
+  };
+
+  const handleSaveTodo = async (field, value) => {
+    if (!editingTodo) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await handleUpdateTodo(editingTodo._id, { [field]: value });
+      setEditingTodo(null);
+    } catch (error) {
+      console.error('Error saving todo:', error);
+      setError('Failed to save todo. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTodo(null);
+  };
+
   if (loading) {
     return (
       <div className="todo-container">
@@ -304,10 +392,20 @@ function App() {
               onComplete={handleCompleteTodo}
               onIncomplete={handleIncompleteTodo}
               onDelete={handleDeleteTodo}
+              onEdit={handleEditTodo}
             />
           ))
         )}
       </div>
+
+      {editingTodo && (
+        <EditTodo
+          todo={editingTodo}
+          onSave={handleSaveTodo}
+          onCancel={handleCancelEdit}
+          onClose={handleCancelEdit}
+        />
+      )}
     </div>
   );
 }
