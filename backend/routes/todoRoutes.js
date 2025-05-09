@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const Todo = require('../models/todoModel');
@@ -77,28 +76,29 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    console.log(`PUT /api/todos/${req.params.id} request received`);
-    console.log('Request body:', req.body);
+    const { id } = req.params;
+    const updates = req.body;
 
-    const todo = await Todo.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    
-    if (!todo) {
-      return res.status(404).json({ message: 'Todo not found' });
+    // Validate required fields
+    if (!updates.task) {
+      return res.status(400).json({ error: 'Task is required' });
     }
-    
-    console.log('Todo updated successfully:', todo);
-    res.json(todo);
+
+    // Update the todo
+    const updatedTodo = await Todo.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTodo) {
+      return res.status(404).json({ error: 'Todo not found' });
+    }
+
+    res.json(updatedTodo);
   } catch (error) {
-    console.error(`Error in PUT /api/todos/${req.params.id}:`, error);
-    console.error('Error stack:', error.stack);
-    res.status(500).json({ 
-      message: 'Failed to update todo',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    console.error('Error updating todo:', error);
+    res.status(500).json({ error: 'Failed to update todo' });
   }
 });
 

@@ -36,10 +36,17 @@ export const addTodo = async (task, description = '', priority = 'Medium', dueDa
 
 export const updateTodo = async (id, updates) => {
   try {
+    if (!id) {
+      throw new Error('Todo ID is required');
+    }
+    if (!updates || !updates.task) {
+      throw new Error('Task is required for update');
+    }
+
     const response = await axios.put(`${API_URL}/${id}`, updates);
     return response.data;
   } catch (error) {
-    console.error('Error updating todo:', error.response?.data?.message || error.message);
+    console.error('Error updating todo:', error.response?.data?.error || error.message);
     throw new Error('Failed to update todo. Please try again.');
   }
 };
