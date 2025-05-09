@@ -133,62 +133,82 @@ const TodoSearch = ({ search, filterPriority, filterStatus, onChange, onSearch }
   </div>
 );
 
-const EditTodo = ({ todo, onSave, onCancel, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-lg p-6 w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-4">Edit Todo</h2>
-      <form onSubmit={onSave} className="todo-form">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <input
-            type="text"
-            placeholder="Task"
-            value={todo.task}
-            onChange={(e) => onSave('task', e.target.value)}
-            className="todo-input"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Description"
-            value={todo.description}
-            onChange={(e) => onSave('description', e.target.value)}
-            className="todo-input"
-          />
-          <select
-            value={todo.priority}
-            onChange={(e) => onSave('priority', e.target.value)}
-            className="todo-input"
-          >
-            <option value="Low">Low Priority</option>
-            <option value="Medium">Medium Priority</option>
-            <option value="High">High Priority</option>
-          </select>
-          <input
-            type="date"
-            value={todo.dueDate}
-            onChange={(e) => onSave('dueDate', e.target.value)}
-            className="todo-input"
-          />
-        </div>
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="todo-button bg-gray-500 hover:bg-gray-600"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="todo-button bg-blue-500 hover:bg-blue-600"
-          >
-            Save
-          </button>
-        </div>
-      </form>
+const EditTodo = ({ todo, onSave, onCancel, onClose }) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Submit the entire todo object
+    onSave(todo);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4">Edit Todo</h2>
+        <form onSubmit={handleSubmit} className="todo-form">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <input
+              type="text"
+              placeholder="Task"
+              value={todo.task}
+              onChange={(e) => {
+                const updatedTodo = { ...todo, task: e.target.value };
+                onSave(updatedTodo);
+              }}
+              className="todo-input"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Description"
+              value={todo.description}
+              onChange={(e) => {
+                const updatedTodo = { ...todo, description: e.target.value };
+                onSave(updatedTodo);
+              }}
+              className="todo-input"
+            />
+            <select
+              value={todo.priority}
+              onChange={(e) => {
+                const updatedTodo = { ...todo, priority: e.target.value };
+                onSave(updatedTodo);
+              }}
+              className="todo-input"
+            >
+              <option value="Low">Low Priority</option>
+              <option value="Medium">Medium Priority</option>
+              <option value="High">High Priority</option>
+            </select>
+            <input
+              type="date"
+              value={todo.dueDate}
+              onChange={(e) => {
+                const updatedTodo = { ...todo, dueDate: e.target.value };
+                onSave(updatedTodo);
+              }}
+              className="todo-input"
+            />
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="todo-button bg-gray-500 hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="todo-button bg-blue-500 hover:bg-blue-600"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -310,18 +330,13 @@ function App() {
     setEditingTodo(todo);
   };
 
-  const handleSaveTodo = async (field, value) => {
+  const handleSaveTodo = async (todo) => {
     if (!editingTodo) return;
 
     try {
       setLoading(true);
       setError(null);
-      
-      // Create a copy of the current todo and update the changed field
-      const updatedTodo = { ...editingTodo, [field]: value };
-      
-      // Update the entire todo object
-      await handleUpdateTodo(editingTodo._id, updatedTodo);
+      await handleUpdateTodo(editingTodo._id, todo);
       setEditingTodo(null);
       fetchTodos(); // Refresh the todo list after update
     } catch (error) {
