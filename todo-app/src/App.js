@@ -316,8 +316,14 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      await handleUpdateTodo(editingTodo._id, { [field]: value });
+      
+      // Create a copy of the current todo and update the changed field
+      const updatedTodo = { ...editingTodo, [field]: value };
+      
+      // Update the entire todo object
+      await handleUpdateTodo(editingTodo._id, updatedTodo);
       setEditingTodo(null);
+      fetchTodos(); // Refresh the todo list after update
     } catch (error) {
       console.error('Error saving todo:', error);
       setError('Failed to save todo. Please try again.');
