@@ -271,7 +271,10 @@ function App() {
 
   const handleAddTodo = async (e) => {
     e.preventDefault();
-    if (!task.trim()) return;
+    if (!task.trim()) {
+      setError('Task is required');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -284,7 +287,7 @@ function App() {
       fetchTodos();
     } catch (error) {
       console.error('Error adding todo:', error);
-      setError('Failed to add todo. Please try again.');
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -294,11 +297,20 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      const response = await updateTodo(id, updates);
+      
+      // Ensure the task field is always present
+      const todoToUpdate = todos.find(todo => todo._id === id);
+      if (!todoToUpdate) {
+        throw new Error('Todo not found');
+      }
+      
+      const updateWithTask = { ...updates, task: updates.task || todoToUpdate.task };
+      
+      const response = await updateTodo(id, updateWithTask);
       setTodos(todos.map(todo => (todo._id === id ? response : todo)));
     } catch (error) {
       console.error('Error updating todo:', error);
-      setError('Failed to update todo. Please try again.');
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -319,11 +331,23 @@ function App() {
   };
 
   const handleCompleteTodo = (id) => {
-    handleUpdateTodo(id, { completed: true });
+    const todo = todos.find(todo => todo._id === id);
+    if (!todo) return;
+    
+    handleUpdateTodo(id, { 
+      completed: true,
+      task: todo.task // Ensure task is included
+    });
   };
 
   const handleIncompleteTodo = (id) => {
-    handleUpdateTodo(id, { completed: false });
+    const todo = todos.find(todo => todo._id === id);
+    if (!todo) return;
+    
+    handleUpdateTodo(id, { 
+      completed: false,
+      task: todo.task // Ensure task is included
+    });
   };
 
   const handleEditTodo = (todo) => {

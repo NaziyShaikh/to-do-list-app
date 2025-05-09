@@ -39,7 +39,9 @@ export const updateTodo = async (id, updates) => {
     if (!id) {
       throw new Error('Todo ID is required');
     }
-    if (!updates || !updates.task) {
+
+    // If this is a status update (completed/incomplete), don't require task
+    if (!('completed' in updates) && (!updates || !updates.task)) {
       throw new Error('Task is required for update');
     }
 
