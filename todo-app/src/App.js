@@ -407,15 +407,6 @@ function App() {
         onSearch={fetchTodos}
       />
 
-      <TodoForm
-        onSubmit={handleAddTodo}
-        task={task}
-        description={description}
-        priority={priority}
-        dueDate={dueDate}
-        onChange={handleInputChange}
-      />
-
       <div className="todo-list">
         {todos.length === 0 ? (
           <div className="text-center py-8">
@@ -443,6 +434,15 @@ function App() {
           onClose={handleCancelEdit}
         />
       )}
+
+      <TodoForm
+        onSubmit={handleAddTodo}
+        task={task}
+        description={description}
+        priority={priority}
+        dueDate={dueDate}
+        onChange={handleInputChange}
+      />
     </div>
   );
 }
