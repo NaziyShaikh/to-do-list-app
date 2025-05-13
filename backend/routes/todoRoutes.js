@@ -78,13 +78,9 @@ router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-
-    // Validate required fields
     if (!updates.task) {
       return res.status(400).json({ error: 'Task is required' });
     }
-
-    // Update the todo
     const updatedTodo = await Todo.findByIdAndUpdate(
       id,
       updates,

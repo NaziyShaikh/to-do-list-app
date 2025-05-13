@@ -134,10 +134,15 @@ const TodoSearch = ({ search, filterPriority, filterStatus, onChange, onSearch }
 );
 
 const EditTodo = ({ todo, onSave, onCancel, onClose }) => {
+  const [editingTodo, setEditingTodo] = useState({ ...todo });
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Submit the entire todo object
-    onSave(todo);
+    onSave(editingTodo);
+  };
+
+  const handleChange = (field, value) => {
+    setEditingTodo(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -149,30 +154,21 @@ const EditTodo = ({ todo, onSave, onCancel, onClose }) => {
             <input
               type="text"
               placeholder="Task"
-              value={todo.task}
-              onChange={(e) => {
-                const updatedTodo = { ...todo, task: e.target.value };
-                onSave(updatedTodo);
-              }}
+              value={editingTodo.task}
+              onChange={(e) => handleChange('task', e.target.value)}
               className="todo-input"
               required
             />
             <input
               type="text"
               placeholder="Description"
-              value={todo.description}
-              onChange={(e) => {
-                const updatedTodo = { ...todo, description: e.target.value };
-                onSave(updatedTodo);
-              }}
+              value={editingTodo.description}
+              onChange={(e) => handleChange('description', e.target.value)}
               className="todo-input"
             />
             <select
-              value={todo.priority}
-              onChange={(e) => {
-                const updatedTodo = { ...todo, priority: e.target.value };
-                onSave(updatedTodo);
-              }}
+              value={editingTodo.priority}
+              onChange={(e) => handleChange('priority', e.target.value)}
               className="todo-input"
             >
               <option value="Low">Low Priority</option>
@@ -181,11 +177,8 @@ const EditTodo = ({ todo, onSave, onCancel, onClose }) => {
             </select>
             <input
               type="date"
-              value={todo.dueDate}
-              onChange={(e) => {
-                const updatedTodo = { ...todo, dueDate: e.target.value };
-                onSave(updatedTodo);
-              }}
+              value={editingTodo.dueDate}
+              onChange={(e) => handleChange('dueDate', e.target.value)}
               className="todo-input"
             />
           </div>
@@ -298,7 +291,6 @@ function App() {
       setLoading(true);
       setError(null);
       
-      // Ensure the task field is always present
       const todoToUpdate = todos.find(todo => todo._id === id);
       if (!todoToUpdate) {
         throw new Error('Todo not found');
@@ -336,7 +328,7 @@ function App() {
     
     handleUpdateTodo(id, { 
       completed: true,
-      task: todo.task // Ensure task is included
+      task: todo.task 
     });
   };
 
@@ -346,7 +338,7 @@ function App() {
     
     handleUpdateTodo(id, { 
       completed: false,
-      task: todo.task // Ensure task is included
+      task: todo.task 
     });
   };
 
@@ -362,7 +354,7 @@ function App() {
       setError(null);
       await handleUpdateTodo(editingTodo._id, todo);
       setEditingTodo(null);
-      fetchTodos(); // Refresh the todo list after update
+      fetchTodos(); 
     } catch (error) {
       console.error('Error saving todo:', error);
       setError('Failed to save todo. Please try again.');
